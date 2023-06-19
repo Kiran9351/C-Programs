@@ -1,0 +1,5 @@
+﻿1. WAP to build a queue using two stacks.
+2. WAP to construct a doubly linked list.
+3. WAP to check if a number is a power of 2.
+4. WAP to check if nth bit is set or not.
+5. WAP to find the missing element from an 1 to n-1 array. Where elements are between 1 to n.

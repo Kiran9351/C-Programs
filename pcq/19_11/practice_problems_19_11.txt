@@ -1,0 +1,5 @@
+1. Given an array with even and odd elements equally arrange them in even-odd-even-odd order.
+2. WAP to print nth fibonacci number. (recursively + iteratively).
+3. WAP for binary search.
+4. Given two strings, s1 and s2. Find if the characters of s2 can be reshuffled to create s1. Also check if the frequency of each character is the same or not.
+5. How does hash map work, why does it take constant time?

@@ -1,0 +1,5 @@
+﻿1.        WAP to detect a cycle in a singly linked list.
+2.        WAP to create a deep copy of a linked list.
+3.        WAP to find the largest sub array which adds up to given sum.
+4.        WAP to find Kth largest number in an array.
+5.        WAP to find two numbers in an array that adds up to given value k.

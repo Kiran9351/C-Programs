@@ -1,0 +1,3 @@
+﻿1. WAP to find an element that appear more n/2 times in an array.
+2. Given a string return if any anagram of a string is palindrome or not.
+3. find an element k in Bitonic Array.

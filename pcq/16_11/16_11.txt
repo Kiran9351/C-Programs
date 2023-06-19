@@ -1,0 +1,5 @@
+1. Implement a stack using Array.
+2. Implement a queue using Array.
+3. Implement a stack using Linked List.
+4. Implement a queue using Linked List.
+5. Implement a queue using two stacks.

@@ -1,0 +1,5 @@
+1. WAP to count the number of nodes in a linked list.
+2. WAP to Detect a loop in a linked list.
+3. WAP for paranthesis checker.
+4. WAP to reverse words in a given string.
+5. WAP to remove duplicates from a string.

@@ -1,0 +1,5 @@
+1. Write a program for selection sort.
+2. Write a program to find the frequency of given element in an array.
+3. Write a program to find the lower bound / first occurance of an element in array (try doing it in logn time). 
+4. Write a program to check if program is an amstrong number or not.
+5. WAP to accept 2 strings and check if first is substring of second.
