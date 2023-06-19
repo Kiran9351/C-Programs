@@ -1,0 +1,336 @@
+Q1.
+
+There are some challeges that will improve my code and doable for me.
+
+
+Improvement 1:
+---------------------------------------------------------------------
+
+- Make search operation on bitmap faster.
+
+	-------------------------------------------------------------
+
+	- Why we need it ?
+	
+	While we are writing a file in virtual disk there are two main
+	operation we need to do.
+		1. Find indices of empty blocks and pointer blocks, 
+		write them in tree structure.
+		2. Read these blocks, get data blocks and write actual 
+		data into the data blocks. 
+		 
+
+	As of now in my code bitmap is kept in the form of array.
+
+	Array indices :
+	    0        1       2         3        4       5
+	-------------------------------------------------------
+	|00000000|00000000|00000000|11111111|11111111|00000000|
+	-------------------------------------------------------
+
+	So, here 0 indicates the block associated with that bit is in 
+	use and 1 indicates that block associated with that bit is not
+	in use.
+
+	Here problem is, if already there are some files in our virutal
+	disk, then while writing new file will take time.
+	In terms of time complexity, lets say there are n elements in 
+	array, and we have to check 8 bits for each index, 
+	so total 8*n comparisons, O(8n).
+	
+	In my code while adding new file, it starts comparing from
+	first bit of bitmap.
+
+	lets say there are two files and these are first two file on 
+	disk of size 1024 MB.
+	Block size of disk is 1024 bytes.
+
+	Total bytes for single file=1024*1024*1024=1073741824 bytes.
+	Total no. of data blocks= filesize/blocksize
+				= 1073741824/1024
+				= 1048576
+	These are level 0, that is data blocks which contains actual data.
+	Pointer blocks need to pointer these data blocks are,
+	= 1048576/256 (256=no. of integers we can store in single block)
+	= 4096
+
+	These are level 1 pointer blocks. In this 4096 blocks indices
+	of actual data blocks.
+
+	Now to keep these 4096 block indices we need more block and we
+	need = 4096/256
+	     = 16 
+	
+	These 16 blocks are level 2 pointer blocks which keeps indices
+	of level 1 block indices.
+
+	And to keep these 16 block indices we need 1 more block.
+
+	So, total 1048576+4096+16+1 = 1052689 bits for single file.
+
+	For two files we need compare 2105378 bits.
+
+	I need to avoid these comparison to get the bits faster.
+
+	------------------------------------------------------------
+	
+	- Ways to improve bit search faster. 
+	
+	We have to keep the metadata or information about the bitmap
+	separately so we can improve the search faster.
+
+	1. In one way we can divide the bitmap in segments as follows.
+
+	         0                2                3     bitmap segment indices.
+	--------------------------------------------------------
+	|   0  	      1    |   2       	3    |	  4       5    | bitmapindices.
+	|-------------------------------------------------------
+	||00000000|00000000|11111111|00000000|00000000|11111111|
+	|-------------------------------------------------------
+	|		   |		     |		       |
+	--------------------------------------------------------
+ 			
+	  
+	Information to keep in segment structure.
+
+	struct bitmap_segment
+	{
+		start bitmap index.
+		no. of available bits segment.
+	}
+
+	for eg.
+
+	for segment 1 of above diagram
+	
+	start bitmap index = 0
+	no of bits available in segment = 0
+
+	for segment 2 of above diagram
+
+	start bitmap index = 2
+	no of bits available in segment = 8
+
+	With this information we can avoid significant no. of bit 
+	comparisons.
+
+	As we can skip whole 0 th segment and search for bits in 
+	in next segments according to its bits requirements.
+
+	--------------------------------------------------------
+
+	2. Another way is to keep the information about the each 
+	available partion of bitmap.
+	
+	    0        1         2        3       4         5
+	-------------------------------------------------------
+	|00000000|00000000|11111111|00000000|01111110|00000000|
+	------------------------------------------------------- 
+			       0                 2             Partition indices
+
+	Structure of parition is
+
+	struct bitmap_partition
+	{
+		start bitmap index
+		bit index from which bits are available.
+		no of bits available in partition.
+	}
+
+	for eg. 
+
+	for partion 0
+
+	start bitmap index = 2
+	bit index from which bits are available = 0
+	no of bits available in parition = 8
+	
+
+	for partition 2
+	
+	start bitmap index = 4
+	bit index from which bits are available = 1
+	no of bits available in partition = 6
+
+	In this way we can get size of partition using no. of bits 
+	available and we can allocate the blocks according to the
+	size of file and can avoid large amount of bit comparisons.
+
+
+----------------------------------------------------------------------
+
+Improvement 2:
+
+- Seek the file.
+	
+	-------------------------------------------------------------
+
+	- Why I need it ?
+	
+	As of now I can read file from 0 th byte to till last byte.
+	
+	I cannot read it from the an give specific byte no.
+
+	To read if from any specific byte no. and specific amount of 
+	bytes only.
+	
+	- This will also help in file appending and file editing.
+	
+	--------------------------------------------------------------
+
+	- Way to do it.
+	
+	Lets say we need to read k bytes from nth byte of file.
+
+	Steps (what to do?):
+	1. Skip the first n bytes
+	2. Read the next k bytes
+
+	Steps (How to do?):
+	1. If nth byte is in pth block, the first we need funtion which
+	skips the first (p-1) blocks.
+	2. Need second function which read the blocks.
+
+		read_block(int fd, int fdest, int block_no, int byte_no_from_which_block_need_to_read, int no_of_bytes to read from that block)
+
+	fd = disk file descriptor
+	fdest = file descriptor of file in which we are going to write
+	the read bytes.
+	
+	This is helpful from both end, because kth block could be in
+	middle of some block.
+
+	3. for remaining blocks we need the access this above fucntion
+	to read the file.
+
+---------------------------------------------------------------------
+
+Improvement 3
+
+- Append or edit the file
+	
+	------------------------------------------------------------
+	
+	- Why it need?
+	
+	As of now my code only write, read and delete the file.
+
+	I want to append and files and edit the file in between the
+	file.
+
+	-----------------------------------------------------------
+
+	- Operations need in append
+
+	If last data block of file is suffcient then write the data in 
+	last block
+
+	If last data block is not enough, the we need to find data blocks 
+	for the appending data and write the data to it.
+	Here we need to add the extra block info. in tree structure of 
+	where we keep all the block no. we need.
+
+	This will be the challenging thing.
+	
+	- Operations need in edit.
+
+	Here we definitely going to need the extra blocks so, first 
+	get the extra blocks,
+	write there info. in tree structure. in order and use them
+	to edited data and to append existing data.
+	
+	I think I need the shift the data from block to another while 
+	appending the data.
+	 
+---------------------------------------------------------------------
+
+Improvement 4:
+
+- What if more than 1 user wants to access the file for writing purpose
+of one is writing and another wants to read.
+
+	--------------------------------------------------------------
+
+	- Why we need to implements this ?
+	
+	This is fundamental problem which I need to improve in my code.
+	
+	If there are more than 1 user or more than 1 threads are access
+	-ing virtual disk for same file then we have to take care of it
+
+	To improve or implement this in code we have to restrict the 
+	the users to access the file accordingly.
+
+	- If one user is writing in file the no other user either to 
+	read or write should be allowed 
+	
+	- If one user is reading the file the no other user who wants 
+	to access the file to write or delete the file.
+
+	-------------------------------------------------------------
+
+	- Way to improve.
+
+	We can implement this by somehow lock the file or restrict the
+	user from accessing the file.
+
+----------------------------------------------------------------------
+
+
+Q2.
+
+I struggled lot while implementing the delete file operation.
+
+What should need to delete the file?
+	- Reset all the bits associated with all the pointer blocks and
+	data blocks related to the file and make available these blocks
+	to next file.
+	- Reset the file metadata used by the file to available.
+
+	-------------------------------------------------------------
+
+- Challenge :
+
+	- Here for me challenge was to reading the tree structure of 
+	block information carefully and reset each one of block bit from 
+	0 to 1, which indicates the block is available.
+
+	- First I was able to reset most of the bits but not all of 
+	them.
+
+	--------------------------------------------------------------
+
+- Strategies and fucntion I implemented :
+
+	- In code its recurssive implementation to reset the bits.
+
+	- Get the bit map from disk.
+
+	- Get file information, like first block from given file name.
+	
+	- Implemented resetpar() function, which takes fd file descriptor
+	or disk, block no., no. of block indices in that given block,
+	and array index of array which keeps the all information about 
+	the no. of blocks required in each level of tree structure.
+
+	- reset_bmap() function to reset the bit while given block no.
+	from block no it calculates the bitmap index and bit no of that
+	bitmap index, and then it reset it from 0 to 1.
+
+	- Initially I was not able to reset these pointer blocks (level 1), then
+	I figured out that I need to reset the actual data blocks at 
+	the end and pointer to data blocks just after the resetting 
+	pointer blocks in resetchild() function.
+
+	resetchild() function takes the fd, block no and array index
+	accordingly it calls the resetpar() and resetpointer_block()
+	which resets the only data blocks (only level 0)
+
+	At the end still I am not able to reset the indices/pointers
+	that represents level 2 or above.	
+	With carefull analysis I figured out that we I can reset these 
+	these indices before it goes to its child level 
+	(from levle p to level q, p >=2 , q >= 1)
+
+----------------------------------------------------------------------
+	

@@ -1,0 +1,21 @@
+Q1. Describe one interesting and challenging improvement you can incorporate in your code if given 1 month more time.
+Q2. Describe one challenging bug you found and fixed in your code in as much as detail as possible.
+	- Write about delete operation.
+-----------------------------------------------------------------------
+
+Points :
+	Potential challenges that I am aware and I can solve.
+
+	- Make bitmap search faster. (2 ways)
+	- Solve multiuser problem/ what if more than user or threads are trying to access the same file, handle the situation.
+	- Seek the file
+	- Append or edit the file.
+
+----------------------------------------------------------------------
+
+Points:
+	Potential bugs 
+	
+	- While deleting the file.
+
+----------------------------------------------------------------------

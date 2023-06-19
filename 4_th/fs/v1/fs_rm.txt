@@ -1,0 +1,46 @@
+- File system tasks :
+
+	- Create a disk
+		- Allocate the memory for disk. - Done
+		
+		- Design disk metadata structure - Done
+		- Allocate memory for Disk metadata. - Done
+		- Fill disk metadata with appropriate values. - Done
+			- Wrte disk metadata to disk	- Done
+			- Read disk metadata from disk	- Done
+
+		- Count no. of flag bits required.	- 1/2 done
+		- write flag bits to disk.	- done
+		- Make bits required to diskmetadata, flagbits, and fmd 
+		to zero - Done
+		
+		- Design file metadata structure.	- Done
+		- Allocate memory for file metadata.	- Done
+		- Fill file metadata with appropriate values. - Done 
+			- Write these file metadata structures to the disk - Done
+			- Read these file metadata structures from disk.  - Done
+
+	--------------------------------------------------------------------------
+	
+	- Write to file 
+		- Ask for filename, filesize
+		- Check if there are enough datablocks
+		- check for FMD block availability
+		- get first block of file
+		- write fmd to disk.
+
+		- get all the required datablock no. and write them to first block.
+
+		- Read datablcok nos. from first block one by one and write the 
+		actual data into datablock, using Diskdriver code.
+
+	- we can keep total bits available beforehand to compare with required bits
+	so that we don't need to counts availalble bits everytime.
+
+	- need to access get bmap from every function whenever we need (i think).
+	otherwise need to keep bmap global array.
+
+	-------------------------------------------------------------------------
+		
+
+
